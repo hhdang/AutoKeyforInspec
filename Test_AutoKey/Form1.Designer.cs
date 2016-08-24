@@ -41,7 +41,7 @@
             this.txtCode.Name = "txtCode";
             this.txtCode.Size = new System.Drawing.Size(303, 75);
             this.txtCode.TabIndex = 0;
-            this.txtCode.Text = "run: D:\\Program Files\\ControlEase\\NX\\InRun.exe\nsleep: 3000\nkey: {ENTER}";
+            this.txtCode.Text = "run:D:\\Program Files\\ControlEase\\NX\\InRun.exe\nsleep:3000\nkey:{ENTER}";
             // 
             // lblInfo
             // 
