@@ -28,8 +28,11 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.txtCode = new System.Windows.Forms.RichTextBox();
             this.lblInfo = new System.Windows.Forms.Label();
+            this.timer1 = new System.Windows.Forms.Timer(this.components);
+            this.timer2 = new System.Windows.Forms.Timer(this.components);
             this.SuspendLayout();
             // 
             // txtCode
@@ -47,6 +50,16 @@
             this.lblInfo.Name = "lblInfo";
             this.lblInfo.Size = new System.Drawing.Size(0, 12);
             this.lblInfo.TabIndex = 1;
+            // 
+            // timer1
+            // 
+            this.timer1.Tag = "excute delay";
+            // 
+            // timer2
+            // 
+            this.timer2.Interval = 1000;
+            this.timer2.Tag = "Start Delay";
+            this.timer2.Tick += new System.EventHandler(this.timer2_Tick);
             // 
             // AutoKey
             // 
@@ -66,6 +79,8 @@
 
         private System.Windows.Forms.RichTextBox txtCode;
         private System.Windows.Forms.Label lblInfo;
+        private System.Windows.Forms.Timer timer1;
+        private System.Windows.Forms.Timer timer2;
     }
 }
 
