@@ -54,6 +54,7 @@
             // timer1
             // 
             this.timer1.Tag = "excute delay";
+            this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
             // timer2
             // 
