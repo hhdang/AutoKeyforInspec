@@ -19,69 +19,31 @@ namespace Test_AutoKey
         private int RUN_WAIT = 100;
         private string processName = "InRun";
 
-        Process[] localByNameApp = Process.GetProcessesByName( "InRun" );
-
-        Stage stage = Stage.CHECK;
+        Process[] localByNameApp = null;
+        Stage stage = Stage.START;
         
-
-
-
-
+        
         public AutoKey()
         {
             InitializeComponent();
-            timer3.Start();
+            start(  );
         }
 
-        private void pushStage( Stage stg )
+        private void start()
         {
-            switch( stg ){
-                case Stage.CHECK:
-                    if (localByNameApp.Length > 0)
-                    {
-                        foreach (Process app in localByNameApp)
-                        {
-                            if (!app.HasExited)
-                            {
-                                app.Kill();
-                            }
-                        }
-                    }
-                    else {
-                        initCode();
-                        stage = Stage.EXEC;
-                        timer2.Start();
-                    }
-
-                    break;
-
-                case Stage.EXEC:
-
+           
+            switch( stage ){
+                case Stage.START:
+                    initCode();
+                    stage = Stage.COUNTDOWN;
                     timer2.Start();
-                    stage = Stage.STOP;
-                    break;
-
-                case Stage.STOP:
-                    timer2.Stop();
-                    timer1.Stop();
-                    lblInfo.Text = "";
-
-                    timer3.Start();
-                    stage = Stage.EXIT;
-                    break;
-
-                case Stage.EXIT:
-                    this.Close();
-                    Application.Exit();
                     break;
 
                 default:
                     break;
-
             }
+            
 
-            
-            
         }
 
         private void initCode()
@@ -107,78 +69,136 @@ namespace Test_AutoKey
 
         private void timer2_Tick(object sender, EventArgs e)
         {
-            StartIndex--;
-            lblInfo.Text = StartIndex.ToString() + "秒后开始";
+            switch( stage ){
+                case Stage.COUNTDOWN:
+                    StartIndex--;
+                    lblInfo.Text = StartIndex.ToString() + "秒后开始";
 
-            if( 0 >= StartIndex ){
-                timer2.Stop();
-                timer1.Interval = RUN_WAIT;
-                timer1.Start();
+                    if( 0 >= StartIndex ){
+                        timer2.Stop();
+                        stage = Stage.CHECK;
+                        timer3.Start();
+                    }
+                    break;
 
+                default:
+                    break;
             }
         }
+        //timer3--cycle Timer,循环检查
+        private void timer3_Tick(object sender, EventArgs e)
+        {
 
+            timer3.Stop();
+            localByNameApp = Process.GetProcessesByName(processName);
+
+            switch( stage ){
+                case Stage.CHECK:
+                    if (localByNameApp.Length > 0)
+                    {
+                        foreach (Process app in localByNameApp)
+                        {
+                            if (!app.HasExited)
+                            {
+                                app.Kill();
+
+                            }
+                        }
+
+                        timer3.Start();
+                    }
+                    else
+                    {
+                        stage = Stage.EXEC;
+                        timer1.Start();
+                    }
+                    break;
+
+                case Stage.EXIT:
+                    if (localByNameApp.Length > 0)
+                    {
+                        this.Close();
+                        Application.Exit();
+                    }
+                    else
+                    {
+                        timer3.Start();
+                    }
+                    break;
+
+                default:
+                    break;
+            }
+
+        }
+        //timer1--cycle EXEC
         private void timer1_Tick(object sender, EventArgs e)
         {
-            timer1.Stop();
-            timer1.Interval = RUN_WAIT;
-            lblInfo.Text = string.Format( "{0}/{1} {2}", codeIndex+1, codeList.Count, codeList[codeIndex] );
+
+            switch( stage ){
+                case Stage.EXEC:
+                    timer1.Stop();
+                    timer1.Interval = RUN_WAIT;
+                    lblInfo.Text = string.Format( "{0}/{1} {2}", codeIndex+1, codeList.Count, codeList[codeIndex] );
             
-            string code = codeList[codeIndex];
-            int split = code.IndexOf( ':' );
-            string codeType = "";
-            string codeContent = "";
+                    string code = codeList[codeIndex];
+                    int split = code.IndexOf( ':' );
+                    string codeType = "";
+                    string codeContent = "";
 
-            if (0 < split)
-            {
-                codeType = code.Substring(0, split);
-                codeContent = code.Substring(split + 1);
-            }
-            else {
-                codeType = code;
-            }
-
-            codeType = codeType.Trim().ToUpper();
-            if( Enum.IsDefined( typeof(CmdType), codeType ) ){
-                try { 
-                    CmdType cmdType = (CmdType)Enum.Parse( typeof(CmdType), codeType );
-                    switch ( cmdType ){
-                        case CmdType.INPUT:
-                            cmdInput( codeContent );
-                            break;
-                        case CmdType.RUN:
-                            cmdRun( codeContent );
-                            break;
-                        case CmdType.KEY:
-                            cmdKey( codeContent );
-                            break;
-                        case CmdType.SLEEP:
-                            cmdSleep( codeContent );
-                            break;
-                        default:
-                            break;
+                    if (0 < split)
+                    {
+                        codeType = code.Substring(0, split);
+                        codeContent = code.Substring(split + 1);
                     }
-                }catch( Exception ex ){
-                    MessageBox.Show( "运行[" + code + "]时失败！\r\n\r\n错误原因：" + ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error );
-                    return;
-                }
-            }
+                    else {
+                        codeType = code;
+                    }
 
-            codeIndex++;
-            if (codeList.Count <= codeIndex)
-            {
-                pushStage( stage );
-            }
-            else {
-                timer1.Start();
+                    codeType = codeType.Trim().ToUpper();
+                    if( Enum.IsDefined( typeof(CmdType), codeType ) ){
+                        try { 
+                            CmdType cmdType = (CmdType)Enum.Parse( typeof(CmdType), codeType );
+                            switch ( cmdType ){
+                                case CmdType.INPUT:
+                                    cmdInput( codeContent );
+                                    break;
+                                case CmdType.RUN:
+                                    cmdRun( codeContent );
+                                    break;
+                                case CmdType.KEY:
+                                    cmdKey( codeContent );
+                                    break;
+                                case CmdType.SLEEP:
+                                    cmdSleep( codeContent );
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }catch( Exception ex ){
+                            MessageBox.Show( "运行[" + code + "]时失败！\r\n\r\n错误原因：" + ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error );
+                            return;
+                        }
+                    }
+
+                    codeIndex++;
+                    if (codeList.Count <= codeIndex)
+                    {
+                        stage = Stage.EXIT;
+                        timer3.Start();
+                    }
+                    else {
+                        timer1.Start();
+                    }
+                    break;
+
+                default:
+                    break;
             }
 
 
         }
 
-
-
- 
 
 
         #region 命令类型
@@ -223,10 +243,12 @@ namespace Test_AutoKey
         }
 
         enum Stage { 
+            START,
+            COUNTDOWN,
+            CHECK,
             EXEC,
             STOP,
             EXIT,
-            CHECK
         }
         #endregion
 
@@ -256,18 +278,7 @@ namespace Test_AutoKey
         }
         #endregion
 
-        private void timer3_Tick(object sender, EventArgs e)
-        {
-            timer3.Stop();
 
-            localByNameApp = Process.GetProcessesByName( processName );
-            if( (Stage.CHECK == stage) || ( Stage.EXIT == stage )){
-                pushStage( stage );
-            }
-            
-           
-            timer3.Start();
-        }
 
     }
 
