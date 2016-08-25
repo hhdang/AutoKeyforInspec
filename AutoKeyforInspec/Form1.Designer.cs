@@ -1,4 +1,4 @@
-﻿namespace Test_AutoKey
+﻿namespace AutoKeyforInspec
 {
     partial class AutoKey
     {

@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.40629.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test_AutoKey", "Test_AutoKey\Test_AutoKey.csproj", "{E891B298-CE1B-49B9-BB4F-5CBA0CFC517B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoKeyforInspec", "AutoKeyforInspec\AutoKeyforInspec.csproj", "{E891B298-CE1B-49B9-BB4F-5CBA0CFC517B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

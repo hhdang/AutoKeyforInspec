@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Diagnostics;
 
-namespace Test_AutoKey
+namespace AutoKeyforInspec
 {
     public partial class AutoKey : Form
     {
