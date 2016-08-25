@@ -17,8 +17,12 @@ namespace Test_AutoKey
         private int codeIndex = 0;
         private int StartIndex = 3;
         private int RUN_WAIT = 100;
+        private string processName = "InRun";
 
-        Stage stage = Stage.START;
+        Process[] localByNameApp = Process.GetProcessesByName( "InRun" );
+
+        Stage stage = Stage.CHECK;
+        
 
 
 
@@ -26,36 +30,49 @@ namespace Test_AutoKey
         public AutoKey()
         {
             InitializeComponent();
-            pushStage( stage );
+            timer3.Start();
         }
 
         private void pushStage( Stage stg )
         {
             switch( stg ){
-                case Stage.START:
-                    if( "" == txtCode.Text ){
-                        lblInfo.Text = "无执行指令";
-                        return;
-                    }
-
-                    codeList = new List<string>();
-                    codeIndex = 0;
-                    foreach( string r in txtCode.Text.Split('\n') ){
-                        if( "" != r.Trim() ){
-                            codeList.Add( r.Trim() );
+                case Stage.CHECK:
+                    if (localByNameApp.Length > 0)
+                    {
+                        foreach (Process app in localByNameApp)
+                        {
+                            if (!app.HasExited)
+                            {
+                                app.Kill();
+                            }
                         }
                     }
+                    else {
+                        initCode();
+                        stage = Stage.EXEC;
+                        timer2.Start();
+                    }
 
-                    StartIndex = 3;
-                    lblInfo.Text = StartIndex.ToString() + "秒后开始";
+                    break;
+
+                case Stage.EXEC:
+
                     timer2.Start();
                     stage = Stage.STOP;
                     break;
+
                 case Stage.STOP:
                     timer2.Stop();
                     timer1.Stop();
                     lblInfo.Text = "";
+
+                    timer3.Start();
                     stage = Stage.EXIT;
+                    break;
+
+                case Stage.EXIT:
+                    this.Close();
+                    Application.Exit();
                     break;
 
                 default:
@@ -65,6 +82,27 @@ namespace Test_AutoKey
 
             
             
+        }
+
+        private void initCode()
+        {
+            if ("" == txtCode.Text)
+            {
+                lblInfo.Text = "无执行指令";
+                return;
+            }
+
+            codeList = new List<string>();
+            codeIndex = 0;
+            foreach (string r in txtCode.Text.Split('\n'))
+            {
+                if ("" != r.Trim())
+                {
+                    codeList.Add(r.Trim());
+                }
+            }
+            StartIndex = 3;
+            lblInfo.Text = StartIndex.ToString() + "秒后开始";
         }
 
         private void timer2_Tick(object sender, EventArgs e)
@@ -185,9 +223,10 @@ namespace Test_AutoKey
         }
 
         enum Stage { 
-            START,
+            EXEC,
             STOP,
-            EXIT
+            EXIT,
+            CHECK
         }
         #endregion
 
@@ -217,8 +256,18 @@ namespace Test_AutoKey
         }
         #endregion
 
+        private void timer3_Tick(object sender, EventArgs e)
+        {
+            timer3.Stop();
 
-
+            localByNameApp = Process.GetProcessesByName( processName );
+            if( (Stage.CHECK == stage) || ( Stage.EXIT == stage )){
+                pushStage( stage );
+            }
+            
+           
+            timer3.Start();
+        }
 
     }
 
